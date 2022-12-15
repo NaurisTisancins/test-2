@@ -10,6 +10,7 @@ import advancedFormat from 'dayjs/plugin/advancedFormat';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import weekday from 'dayjs/plugin/weekday';
 import toObject from 'dayjs/plugin/toObject';
+import { dateFormat } from 'highcharts';
 
 dayjs.extend(toObject);
 dayjs.extend(updateLocale);
@@ -53,19 +54,21 @@ export const DateScrollableTabGroup: FC<Props> = ({
   const [selected, setSelected] = useState<number>(1);
 
   const requestFormat = 'MM/DD/YYYY';
-  const theme = useTheme();
 
   const [week, setWeek] = useState(
-    `${dayjs().weekday(0).format('MM/DD')} - ${dayjs()
+    `${dayjs().weekday(0).subtract(4, 'year').format('MM/DD')} - ${dayjs()
       .weekday(6)
+      .subtract(4, 'year')
       .format('MM/DD')}`
   );
-  const [month, setMonth] = useState(dayjs().format('MMMM'));
-  const [year, setYear] = useState(dayjs().format('YYYY'));
+  const [month, setMonth] = useState(
+    dayjs().subtract(4, 'year').format('MMMM')
+  );
+  const [year, setYear] = useState(dayjs().subtract(4, 'year').format('YYYY'));
 
   const [period, setPeriod] = useState({
-    startDate: dayjs().weekday(0).format(requestFormat),
-    endDate: dayjs().weekday(6).format(requestFormat),
+    startDate: dayjs().weekday(0).subtract(4, 'year').format(requestFormat),
+    endDate: dayjs().weekday(6).subtract(4, 'year').format('MM/DD/YYYY'),
   });
 
   const switchWeek = (forward: boolean) => {
@@ -117,6 +120,7 @@ export const DateScrollableTabGroup: FC<Props> = ({
       .add(1, 'year')
       .subtract(1, 'day')
       .format(requestFormat);
+
     fetchNewDataByPeriod(newStartDate, newEndDate, 3);
 
     setPeriod(() => {
@@ -159,8 +163,15 @@ export const DateScrollableTabGroup: FC<Props> = ({
     let newEndDate: string;
     switch (selectedPeriod) {
       case 1:
-        newStartDate = dayjs().weekday(0).format(requestFormat);
-        newEndDate = dayjs().weekday(6).format(requestFormat);
+        newStartDate = dayjs()
+          .weekday(0)
+          .subtract(4, 'year')
+          .format(requestFormat);
+        newEndDate = dayjs()
+          .weekday(6)
+          .subtract(4, 'year')
+          .format(requestFormat);
+        console.log(newStartDate, newEndDate);
         fetchNewDataByPeriod(newStartDate, newEndDate, 1);
         setPeriod(() => {
           return {
@@ -172,14 +183,17 @@ export const DateScrollableTabGroup: FC<Props> = ({
       case 2:
         newStartDate = dayjs()
           .month(dayjs().toObject().months)
+          .subtract(4, 'year')
           .date(1)
           .format(requestFormat);
+
         newEndDate = dayjs(newStartDate)
           .month(dayjs().toObject().months)
           .add(1, 'month')
           .subtract(1, 'day')
           .format(requestFormat);
         fetchNewDataByPeriod(newStartDate, newEndDate, 2);
+        console.log(newStartDate, newEndDate);
         setPeriod(() => {
           return {
             startDate: newStartDate,
@@ -188,9 +202,18 @@ export const DateScrollableTabGroup: FC<Props> = ({
         });
         break;
       case 3:
-        newStartDate = dayjs().month(0).date(1).format(requestFormat);
-        newEndDate = dayjs().month(12).date(-1).format(requestFormat);
+        newStartDate = dayjs()
+          .month(0)
+          .date(1)
+          .subtract(4, 'year')
+          .format(requestFormat);
+        newEndDate = dayjs()
+          .month(12)
+          .date(-1)
+          .subtract(4, 'year')
+          .format(requestFormat);
         fetchNewDataByPeriod(newStartDate, newEndDate, 3);
+        console.log(newStartDate, newEndDate);
         setPeriod(() => {
           return {
             startDate: newStartDate,
@@ -273,7 +296,6 @@ export const TabsMidContainer = styled.div`
   flex-grow: 1;
   overflow-x: auto;
   width: 100%;
-  gap: 4px;
 
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
